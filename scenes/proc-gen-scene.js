@@ -17,7 +17,7 @@ let ProcGenScene = new Phaser.Class({
 
 
     initialize: function ProcGenScene() {
-        Phaser.Scene.call(this, {key: 'ProcedurallyGeneratedScene'});
+        Phaser.Scene.call(this, {key: 'ProcGenScene'});
     },
     characterFrameConfig: {frameWidth: 31, frameHeight: 31},
     slimeFrameConfig: {frameWidth: 32, frameHeight: 32},
