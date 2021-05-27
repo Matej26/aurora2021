@@ -43,10 +43,9 @@ let StartingScene = new Phaser.Class({
         this.load.spritesheet('punk', punkSpriteSheet, this.characterFrameConfig);
         this.load.spritesheet('slime', slimeSpriteSheet, this.slimeFrameConfig);
         this.load.audio('footsteps', Footsteps);
-        this.load.glsl('fire', "./shaders/sample.frag");
+        this.load.glsl('fire', ".shaders/sample.frag");
     },
     create: function () {
-
         this.gameObjects = [];
         const map = this.make.tilemap({key: "map"});
 

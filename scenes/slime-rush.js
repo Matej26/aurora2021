@@ -185,6 +185,9 @@ let SlimeRushScene = new Phaser.Class({
     characterFrameConfig: {frameWidth: 31, frameHeight: 31},
     slimeFrameConfig: {frameWidth: 32, frameHeight: 32},
     preload: function () {
+        this.load.glsl('wave', "./shaders/wave.frag");
+        this.load.glsl('example', "./shaders/example.frag");
+
         //loading map tiles and json with positions
         this.load.image("tiles", tilemapPng);
         this.load.tilemapTiledJSON("map", dungeonRoomJson);
@@ -231,6 +234,7 @@ let SlimeRushScene = new Phaser.Class({
         // Player
         this.playerWithGun = new PlayerWithGun(this, 380, 260, 'aurora', 'gun')
         this.playerWithGun.animationSets = this.characterFactory.animationLibrary.get('aurora');
+        this.playerWithGun.setDepth(1);
 
         const wasdCursorKeys = this.input.keyboard.addKeys({
             up:Phaser.Input.Keyboard.KeyCodes.W,
@@ -283,27 +287,41 @@ let SlimeRushScene = new Phaser.Class({
         this.physics.world.bounds.width = map.widthInPixels;
         this.physics.world.bounds.height = map.heightInPixels;
 
-        this.slimes =  this.physics.add.group();
-        let params = {};
-        for(let i = 0; i < 14; i++) {
-            const x = Phaser.Math.RND.between(50, this.physics.world.bounds.width - 50 );
-            const y = Phaser.Math.RND.between(50, this.physics.world.bounds.height -50 );
-            params.slimeType = Phaser.Math.RND.between(0, 4);
-            const slime = this.characterFactory.buildSlime(x, y, params);
-            this.slimes.add(slime);
-            this.physics.add.collider(slime, worldLayer);
-            this.gameObjects.push(slime);
-        }
-        this.physics.add.collider(this.playerWithGun, this.slimes);
+        // this.slimes =  this.physics.add.group();
+        // let params = {};
+        // for(let i = 0; i < 14; i++) {
+        //     const x = Phaser.Math.RND.between(50, this.physics.world.bounds.width - 50 );
+        //     const y = Phaser.Math.RND.between(50, this.physics.world.bounds.height -50 );
+        //     params.slimeType = Phaser.Math.RND.between(0, 4);
+        //     const slime = this.characterFactory.buildSlime(x, y, params);
+        //     this.slimes.add(slime);
+        //     this.physics.add.collider(slime, worldLayer);
+        //     this.gameObjects.push(slime);
+        // }
+        // this.physics.add.collider(this.playerWithGun, this.slimes);
 
-        // Slime damage
-        this.physics.add.collider(this.bullets, this.slimes, (bullet, slime) => {
-            if (bullet.active) { /* very important */
-                slime.damage()
-                bullet.setActive(false)
-                bullet.setVisible(false)
-            }
-        });
+        // // Slime damage
+        // this.physics.add.collider(this.bullets, this.slimes, (bullet, slime) => {
+        //     if (bullet.active) { /* very important */
+        //         slime.damage()
+        //         bullet.setActive(false)
+        //         bullet.setVisible(false)
+        //     }
+        // });
+
+        this.wave = this.add.shader('wave', 0, 0, 10000, 10000);
+        this.wave.setUniform('width.value', 16.0);
+        this.wave.setUniform('height.value', 16.0);
+        this.wave.setUniform('left.value', 650.0);
+        this.wave.setUniform('top.value', 450.0);
+        this.wave.setUniform('alpha.value', 1.0);
+        this.wave.setUniform('beta.value', 1.0);
+        this.wave.setDepth(2);
+
+        this.trap = this.add.shader('example', 0, 0, 10000, 10000);
+        this.trap.setUniform('centerX.value', 400.0);
+        this.trap.setUniform('centerY.value', 300.0);
+        this.trap.setUniform('radius.value', 45.0);
     },
     update: function () {
         if (this.gameObjects) {

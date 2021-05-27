@@ -50,13 +50,14 @@ let RandomScene = new Phaser.Class({
         this.load.spritesheet('punk', punkSpriteSheet, this.characterFrameConfig);
         this.load.spritesheet('slime', slimeSpriteSheet, this.slimeFrameConfig);
         this.load.audio('footsteps', Footsteps);
+        this.load.glsl('example', "./shaders/example.frag");
     }, 
 
     create: function() {
         this.gameObjects = [];
         this.characterFactory = new CharacterFactory(this);
         this.hasPlayerReachedStairs = false;
-        const width = 30; const height = 30;
+        const width = 25; const height = 19;
 
         let levelMatrix = []
         for(let y = 0; y < height; y++){
@@ -86,6 +87,7 @@ let RandomScene = new Phaser.Class({
             levelMatrix = getDungeonMap(height, width, levelMatrix, outsideLayer, stuffLayer, groundLayer)
 
         this.player = this.characterFactory.buildCharacter('aurora', 60, 60, {player: true});
+        this.player.setDepth(1);
 
         this.physics.add.collider(this.player, groundLayer);
         this.physics.add.collider(this.player, outsideLayer);
@@ -102,6 +104,11 @@ let RandomScene = new Phaser.Class({
         stuffLayer.setDepth(10);
         outsideLayer.setDepth(9999);
         outsideLayer.setCollisionBetween(1, 500);
+
+        this.wave = this.add.shader('example', 0, 0, 10000, 10000);
+        this.wave.setUniform('centerX.value', 300.0);
+        this.wave.setUniform('centerY.value', 300.0);
+        this.wave.setUniform('radius.value', 40.0);
     },
 
     update: function() {
@@ -162,50 +169,50 @@ function getDungeonMap(height, width, levelMatrix, outsideLayer, stuffLayer, gro
         }
     }
 
-    let matrix = []
-    for(let y = 0; y < height; y++){
-        let col = [];
-        for (let x = 0; x < width; x++)
-            col.push(0);
-        matrix.push(col);
-    }
+    // let matrix = []
+    // for(let y = 0; y < height; y++){
+    //     let col = [];
+    //     for (let x = 0; x < width; x++)
+    //         col.push(0);
+    //     matrix.push(col);
+    // }
 
-    for (let k = 0; k < getRandomInt(5, 8); k++) {
-        let x = getRandomInt(1, 24)
-        let y = getRandomInt(1, 24)
-        let tile_counter = 0
-        let flag = false
+    // for (let k = 0; k < getRandomInt(5, 8); k++) {
+    //     let x = getRandomInt(1, 24)
+    //     let y = getRandomInt(1, 24)
+    //     let tile_counter = 0
+    //     let flag = false
 
-        for (let j = 0; j < 4; j++) {
-            for (let i = 0; i < 3; i++) {
-                if (matrix[y + j][x + i] != 0) {
-                    flag = true
-                    break
-                }
-            }
-        }
+    //     for (let j = 0; j < 4; j++) {
+    //         for (let i = 0; i < 3; i++) {
+    //             if (matrix[y + j][x + i] != 0) {
+    //                 flag = true
+    //                 break
+    //             }
+    //         }
+    //     }
 
-        if (!flag) {
-            for (let j = 0; j < 4; j++) {
-                for (let i = 0; i < 3; i++) {
-                    outsideLayer.putTileAt(tile_counter + i, x + i, y + j)
-                    matrix[y + j][x + i] = 1
-                }
-                tile_counter += 16
-            }
-        }
-    }
+    //     if (!flag) {
+    //         for (let j = 0; j < 4; j++) {
+    //             for (let i = 0; i < 3; i++) {
+    //                 outsideLayer.putTileAt(tile_counter + i, x + i, y + j)
+    //                 matrix[y + j][x + i] = 1
+    //             }
+    //             tile_counter += 16
+    //         }
+    //     }
+    // }
 
-    for (let i = 0; i < getRandomInt(15, 25); i++) {
-        let x = getRandomInt(1, 28)
-        let y = getRandomInt(2, 28)
-        if (matrix[y][x] != 1 && matrix[y - 1][x] != 1) {
-            outsideLayer.putTileAt(LEVEL_TO_TILE[5], x, y)
-            stuffLayer.putTileAt(LEVEL_TO_TILE[4], x, y - 1)
-            matrix[y][x] = 1
-            matrix[y - 1][x] = 1
-        }
-    }
+    // for (let i = 0; i < getRandomInt(15, 25); i++) {
+    //     let x = getRandomInt(1, 28)
+    //     let y = getRandomInt(2, 28)
+    //     if (matrix[y][x] != 1 && matrix[y - 1][x] != 1) {
+    //         outsideLayer.putTileAt(LEVEL_TO_TILE[5], x, y)
+    //         stuffLayer.putTileAt(LEVEL_TO_TILE[4], x, y - 1)
+    //         matrix[y][x] = 1
+    //         matrix[y - 1][x] = 1
+    //     }
+    // }
 
     return levelMatrix
 }
